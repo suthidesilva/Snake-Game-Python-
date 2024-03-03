@@ -38,9 +38,7 @@ Contributions are welcome! If you have improvements or bug fixes, please follow 
 4. Push your branch and open a pull request.
 
 ## Authors
-
-
-Contact information:
+Suthi de Silva
 
 ## License
 This project is licensed under the [MIT License](LICENSE.md) - see the LICENSE file for details.
