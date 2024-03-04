@@ -4,7 +4,12 @@ import random
 
 pygame.init()
 
-# Define colors
+# Display window size
+dis_width = 600
+dis_height = 400
+dis = pygame.display.set_mode((dis_width, dis_height))
+
+# Colors
 white = (255, 255, 255)
 yellow = (255, 255, 102)
 black = (0, 0, 0)
@@ -12,31 +17,35 @@ red = (213, 50, 80)
 green = (0, 255, 0)
 blue = (50, 153, 213)
 
-# Display window size
-dis_width = 600
-dis_height = 400
-dis = pygame.display.set_mode((dis_width, dis_height))
+# Load images
+snake_img = pygame.image.load('snake_body.png')
+food_img = pygame.image.load('food.png')
+background_img = pygame.image.load('background.png')
 
 # Set the title of the window
-pygame.display.set_caption('Snake Game by OpenAI')
+pygame.display.set_caption('Snake Game with Modes')
 
 clock = pygame.time.Clock()
 
 snake_block = 10
 snake_speed = 15
 
-font_style = pygame.font.SysFont(None, 35)
-score_font = pygame.font.SysFont(None, 35)
+font_style = pygame.font.SysFont("bahnschrift", 25)
+score_font = pygame.font.SysFont("comicsansms", 35)
 
 def our_snake(snake_block, snake_list):
     for x in snake_list:
-        pygame.draw.rect(dis, black, [x[0], x[1], snake_block, snake_block])
+        dis.blit(snake_img, (x[0], x[1]))
 
 def message(msg, color):
     mesg = font_style.render(msg, True, color)
     dis.blit(mesg, [dis_width / 6, dis_height / 3])
 
-def gameLoop():  # creating a function for the game loop
+def your_score(score):
+    value = score_font.render("Your Score: " + str(score), True, yellow)
+    dis.blit(value, [0, 0])
+
+def gameLoop(game_mode):
     game_over = False
     game_close = False
 
@@ -52,6 +61,15 @@ def gameLoop():  # creating a function for the game loop
     foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
     foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
 
+    # Time Trial Mode Variables
+    start_time = pygame.time.get_ticks()
+    time_limit = 60000  # 60 seconds for Time Trial Mode
+
+    # Survival Mode Variables
+    boundary_shrink_timer = 0
+    boundary_shrink_interval = 10000  # Boundary shrinks every 10 seconds in Survival Mode
+    boundary_margin = 0
+
     while not game_over:
 
         while game_close:
@@ -65,7 +83,7 @@ def gameLoop():  # creating a function for the game loop
                         game_over = True
                         game_close = False
                     if event.key == pygame.K_c:
-                        gameLoop()
+                        gameLoop(game_mode)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -84,12 +102,29 @@ def gameLoop():  # creating a function for the game loop
                     y1_change = snake_block
                     x1_change = 0
 
-        if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < 0:
+        # Time Trial Mode Timer Check
+        if game_mode == 'time_trial' and (pygame.time.get_ticks() - start_time) > time_limit:
+            message("Time's Up! Press C-Play Again or Q-Quit", red)
+            pygame.display.update()
+            time.sleep(2)
+            gameLoop(game_mode)
+
+        # Survival Mode: Shrink Boundary
+        if game_mode == 'survival':
+            current_time = pygame.time.get_ticks()
+            if current_time - boundary_shrink_timer > boundary_shrink_interval:
+                boundary_margin += 10
+                boundary_shrink_timer = current_time
+
+        if x1 >= dis_width - boundary_margin or x1 < boundary_margin or y1 >= dis_height - boundary_margin or y1 < boundary_margin:
             game_close = True
         x1 += x1_change
         y1 += y1_change
-        dis.fill(blue)
-        pygame.draw.rect(dis, green, [foodx, foody, snake_block, snake_block])
+        dis.blit(background_img, (0, 0))
+        # Draw boundary for survival mode
+        if game_mode == 'survival':
+            pygame.draw.rect(dis, red, [boundary_margin, boundary_margin, dis_width - 2*boundary_margin, dis_height - 2*boundary_margin], 1)
+        dis.blit(food_img, (foodx, foody))
         snake_Head = []
         snake_Head.append(x1)
         snake_Head.append(y1)
@@ -102,11 +137,13 @@ def gameLoop():  # creating a function for the game loop
                 game_close = True
 
         our_snake(snake_block, snake_List)
+        your_score(Length_of_snake - 1)
+
         pygame.display.update()
 
         if x1 == foodx and y1 == foody:
-            foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
-            foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
+            foodx = round(random.randrange(boundary_margin, dis_width - snake_block - boundary_margin) / 10.0) * 10.0
+            foody = round(random.randrange(boundary_margin, dis_height - snake_block - boundary_margin) / 10.0) * 10.0
             Length_of_snake += 1
 
         clock.tick(snake_speed)
@@ -114,4 +151,6 @@ def gameLoop():  # creating a function for the game loop
     pygame.quit()
     quit()
 
-gameLoop()
+# Start in Time Trial Mode
+gameLoop('time_trial')
+# For Survival Mode, call gameLoop('survival') instead.
