@@ -3,6 +3,8 @@
 ## Description
 This project is a simple implementation of the classic Snake game using Python and Pygame. The player controls a snake, guiding it to eat food while avoiding the walls and its own tail. Each time the snake eats food, it grows longer, making the game progressively more challenging.
 
+## I am still working on different versions of this game
+
 ## Getting Started
 
 ### Dependencies
