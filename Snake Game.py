@@ -139,4 +139,14 @@ def gameLoop(game_mode, snake_speed):
         pygame.display.update()
 
         if x1 == foodx and y1 == foody:
-            foodx = round(random.randrange(boundary_margin, dis_width - snake_block
+            foodx = round(random.randrange(boundary_margin, dis_width - snake_block - boundary_margin) / 10.0) * 10.0
+            foody = round(random.randrange(boundary_margin, dis_height - snake_block - boundary_margin) / 10.0) * 10.0
+            Length_of_snake += 1
+
+        clock.tick(snake_speed)
+
+    pygame.quit()
+    quit()
+
+# Example: To start the game in Survival mode with fast speed
+gameLoop('survival', snake_speed_options['fast'])
